@@ -166,6 +166,22 @@
       font-size: 13px;
     }
 
+    select {
+      appearance: none;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--text);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    :root[data-theme="light"] select {
+      background: #ffffff;
+      color: #1f2937;
+      box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+    }
+
     .mobile-controls {
       margin-top: 14px;
       display: none;
@@ -332,7 +348,17 @@
         <button id="helpBtn" class="ghost">玩法介绍 (?)</button>
         <button id="themeToggleBtn" class="ghost" aria-label="切换深色/浅色">切换主题</button>
       </div>
-      <div class="hint">方向键 / WASD / 触屏方向键 / 滑动控制。默认穿墙；仅撞到自己结束（迷宫墙会阻挡）。</div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+        <label class="hint" for="difficultySelect" style="display:inline-flex; gap:8px; align-items:center;">
+          难度
+          <select id="difficultySelect" aria-label="选择难度">
+            <option value="casual">休闲</option>
+            <option value="standard">标准</option>
+            <option value="hardcore">硬核</option>
+          </select>
+        </label>
+        <div class="hint">方向键 / WASD / 触屏方向键 / 滑动控制。默认穿墙；仅撞到自己结束（迷宫墙会阻挡）。</div>
+      </div>
     </div>
 
     <div class="mobile-controls" aria-label="触屏方向控制">
@@ -404,6 +430,7 @@
     const restartBtn = document.getElementById('restartBtn');
     const helpBtn = document.getElementById('helpBtn');
     const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const difficultySelect = document.getElementById('difficultySelect');
     const helpModal = document.getElementById('helpModal');
     const closeHelpBtn = document.getElementById('closeHelpBtn');
     const statsModal = document.getElementById('statsModal');
@@ -434,6 +461,86 @@
 
     function saveUiTheme(theme) {
       try { localStorage.setItem('snake_ui_theme', theme); } catch {}
+    }
+
+    const Difficulty = {
+      Casual: 'casual',
+      Standard: 'standard',
+      Hardcore: 'hardcore'
+    };
+
+    let difficulty = Difficulty.Standard;
+
+    function difficultyName(value) {
+      if (value === Difficulty.Casual) return '休闲';
+      if (value === Difficulty.Hardcore) return '硬核';
+      return '标准';
+    }
+
+    function loadDifficulty() {
+      try {
+        const stored = localStorage.getItem('snake_difficulty');
+        if (stored === Difficulty.Casual || stored === Difficulty.Standard || stored === Difficulty.Hardcore) return stored;
+      } catch {}
+      return Difficulty.Standard;
+    }
+
+    function saveDifficulty(value) {
+      try { localStorage.setItem('snake_difficulty', value); } catch {}
+    }
+
+    function difficultyConfig() {
+      // Central tuning knobs
+      if (difficulty === Difficulty.Casual) {
+        return {
+          baseSpeed: 5,
+          maxSpeed: 11,
+          speedEvery: 9,
+          eventMinGapMs: 9500,
+          eventChance: 0.12,
+          specialFoodChance: 0.085,
+          specialFoodTtlMs: 12000,
+          abilityMs: { wrap: 12000, slow: 11500, magnet: 12000 },
+          mazeTtlMs: 6000,
+          mazeDensity: 0.06,
+          mazeAvoidRadius: 2,
+          speedLaneBoost: 2,
+          speedLaneMax: 15
+        };
+      }
+      if (difficulty === Difficulty.Hardcore) {
+        return {
+          baseSpeed: 7,
+          maxSpeed: 16,
+          speedEvery: 5,
+          eventMinGapMs: 6500,
+          eventChance: 0.22,
+          specialFoodChance: 0.11,
+          specialFoodTtlMs: 8500,
+          abilityMs: { wrap: 8500, slow: 7000, magnet: 8500 },
+          mazeTtlMs: 9000,
+          mazeDensity: 0.12,
+          mazeAvoidRadius: 1,
+          speedLaneBoost: 5,
+          speedLaneMax: 22
+        };
+      }
+      // Standard
+      return {
+        baseSpeed: 6,
+        maxSpeed: 12,
+        speedEvery: 8,
+        eventMinGapMs: 9000,
+        eventChance: 0.14,
+        specialFoodChance: 0.08,
+        specialFoodTtlMs: 11000,
+        abilityMs: { wrap: 11000, slow: 10500, magnet: 11000 },
+        mazeTtlMs: 6500,
+        mazeDensity: 0.07,
+        mazeAvoidRadius: 2,
+        speedLaneBoost: 3,
+        speedLaneMax: 16
+      };
     }
 
     const cellSize = canvas.width / GRID_SIZE;
@@ -570,9 +677,9 @@
     }
 
     function computeSpeed() {
-      // Easier: slower ramp
-      const level = Math.floor(score / 8);
-      return Math.min(BASE_SPEED + level, MAX_SPEED);
+      const cfg = difficultyConfig();
+      const level = Math.floor(score / cfg.speedEvery);
+      return Math.min(cfg.baseSpeed + level, cfg.maxSpeed);
     }
 
     function currentTheme() {
@@ -649,6 +756,7 @@
       score = 0;
       gameOver = false;
       running = false;
+      difficultySelect.value = difficulty;
       runStartedAt = 0;
       runEndedAt = 0;
       maxLength = snake.length;
@@ -703,15 +811,16 @@
 
     function spawnSpecialFood() {
       if (specialFood) return;
+      const cfg = difficultyConfig();
       // Spawn rarely.
-      if (Math.random() > 0.08) return;
+      if (Math.random() > cfg.specialFoodChance) return;
       const types = [AbilityType.Wrap, AbilityType.Slow, AbilityType.Magnet];
       const type = types[Math.floor(Math.random() * types.length)];
       specialFood = {
         ...randomEmptyCell(),
         type,
         createdAt: performance.now(),
-        ttlMs: 11000
+        ttlMs: cfg.specialFoodTtlMs
       };
     }
 
@@ -721,9 +830,9 @@
     }
 
     function spawnEventIfNeeded(now) {
-      // Easier: less frequent events
-      if (now - mapEvents.lastSpawnAt < 9000) return;
-      if (Math.random() > 0.14) return;
+      const cfg = difficultyConfig();
+      if (now - mapEvents.lastSpawnAt < cfg.eventMinGapMs) return;
+      if (Math.random() > cfg.eventChance) return;
 
       mapEvents.lastSpawnAt = now;
       const roll = Math.random();
@@ -744,17 +853,18 @@
         eventsSeen.add('加速带');
       } else {
         // Maze generator: create walls with an opening
+        const cfg = difficultyConfig();
         mapEvents.maze.active = true;
-        mapEvents.maze.until = now + 6500;
+        mapEvents.maze.until = now + cfg.mazeTtlMs;
         mapEvents.maze.walls = new Set();
         // Make a simple randomized maze-ish pattern (no full algorithm; lightweight)
-        const density = 0.07;
+        const density = cfg.mazeDensity;
         const opening = { x: randomInt(0, GRID_SIZE - 1), y: randomInt(0, GRID_SIZE - 1) };
         for (let y = 0; y < GRID_SIZE; y++) {
           for (let x = 0; x < GRID_SIZE; x++) {
             if (x === opening.x && y === opening.y) continue;
             // Avoid spawning walls on snake head start area too aggressively
-            const nearSnake = snake.some(seg => Math.abs(seg.x - x) <= 2 && Math.abs(seg.y - y) <= 2);
+            const nearSnake = snake.some(seg => Math.abs(seg.x - x) <= cfg.mazeAvoidRadius && Math.abs(seg.y - y) <= cfg.mazeAvoidRadius);
             if (nearSnake) continue;
             if (Math.random() < density) mapEvents.maze.walls.add(cellKey(x, y));
           }
@@ -900,15 +1010,16 @@
         specialFood = null;
         abilitiesCollected += 1;
         abilitiesCollectedByType.set(type, (abilitiesCollectedByType.get(type) || 0) + 1);
-        // abilities last 7-10 seconds.
-        if (type === AbilityType.Wrap) setAbility(AbilityType.Wrap, 11000);
-        if (type === AbilityType.Slow) setAbility(AbilityType.Slow, 10500);
-        if (type === AbilityType.Magnet) setAbility(AbilityType.Magnet, 11000);
+        const cfg = difficultyConfig();
+        if (type === AbilityType.Wrap) setAbility(AbilityType.Wrap, cfg.abilityMs.wrap);
+        if (type === AbilityType.Slow) setAbility(AbilityType.Slow, cfg.abilityMs.slow);
+        if (type === AbilityType.Magnet) setAbility(AbilityType.Magnet, cfg.abilityMs.magnet);
       }
 
       // Speed lane changes tickMs temporarily
       if (isSpeedLaneCell(newHead.x, newHead.y)) {
-        tickMs = 1000 / Math.min(computeSpeed() + 3, 16);
+        const cfg = difficultyConfig();
+        tickMs = 1000 / Math.min(computeSpeed() + cfg.speedLaneBoost, cfg.speedLaneMax);
       } else {
         tickMs = 1000 / computeSpeed();
       }
@@ -1315,9 +1426,22 @@
       saveUiTheme(next);
     });
 
+    difficultySelect.addEventListener('change', () => {
+      const next = difficultySelect.value;
+      if (next === Difficulty.Casual || next === Difficulty.Standard || next === Difficulty.Hardcore) {
+        difficulty = next;
+        saveDifficulty(difficulty);
+        // Update speed immediately for current run
+        tickMs = 1000 / computeSpeed();
+        syncHUD();
+      }
+    });
+
     best = loadBestScore();
     resetGame();
     applyUiTheme(loadUiTheme());
+    difficulty = loadDifficulty();
+    difficultySelect.value = difficulty;
     // Show tutorial on first load
     try {
       const seen = localStorage.getItem('snake_seen_help') === '1';
