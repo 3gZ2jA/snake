@@ -33,4 +33,4 @@ python3 -m http.server 8000 --bind 0.0.0.0
 - 吃到食物加分并变长，分数越高速度越快
 - 最高分保存在浏览器本地（localStorage）
 
-<!-- CI: trigger Vercel Git integration -->
+<!-- CI: trigger Vercel Git integration (post-fix) -->
