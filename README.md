@@ -63,3 +63,10 @@ python3 -m http.server 8000 --bind 0.0.0.0
 > 注：你提到的“流体动画/惯性与弯曲物理”属于较重的物理模拟；当前实现了轻量的转向惯性渲染（头部偏移 + turn smoothing），如需更真实的曲线蛇身（基于样条/弹簧链），可以继续升级。
 
 <!-- CI: trigger Vercel Git integration -->
+
+## Release-based Deploy / 仅发布版部署
+
+该仓库已配置为：
+
+- **GitHub push 不会自动部署到 Vercel**
+- 只有在 GitHub 创建并发布 **Release** 后，才会自动部署该 Release 对应的 tag 版本到 Vercel
