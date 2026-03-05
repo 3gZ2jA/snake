@@ -6,16 +6,34 @@
   <title>贪吃蛇 Snake</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
+      --bg: #0b1020;
+      --panel: #0f172a;
       --text: #e5e7eb;
       --muted: #94a3b8;
       --accent: #22c55e;
       --danger: #ef4444;
-      --grid: #1f2937;
+      --grid: rgba(148, 163, 184, 0.16);
       --snake: #22c55e;
       --snake-head: #16a34a;
       --food: #f59e0b;
+      --card-border: rgba(148, 163, 184, 0.18);
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+      --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.35);
+      --chip-bg: rgba(99, 102, 241, 0.10);
+      --chip-border: rgba(99, 102, 241, 0.20);
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --grid: rgba(31, 41, 55, 0.08);
+      --card-border: rgba(31, 41, 55, 0.12);
+      --shadow: 0 18px 42px rgba(17, 24, 39, 0.12);
+      --shadow-soft: 0 10px 24px rgba(17, 24, 39, 0.10);
+      --chip-bg: rgba(59, 130, 246, 0.10);
+      --chip-border: rgba(59, 130, 246, 0.18);
     }
 
     * { box-sizing: border-box; }
@@ -24,7 +42,11 @@
       margin: 0;
       min-height: 100vh;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 45%);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 44%),
+        radial-gradient(circle at 78% 16%, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0) 52%),
+        radial-gradient(circle at 40% 88%, rgba(236, 72, 153, 0.16) 0%, rgba(236, 72, 153, 0) 58%),
+        var(--bg);
       color: var(--text);
       display: grid;
       place-items: center;
@@ -33,11 +55,11 @@
 
     .app {
       width: min(92vw, 680px);
-      background: color-mix(in srgb, var(--panel) 92%, black);
-      border: 1px solid #334155;
+      background: var(--panel);
+      border: 2px solid var(--card-border);
       border-radius: 16px;
       padding: 18px;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--shadow);
     }
 
     .top {
@@ -55,6 +77,12 @@
       letter-spacing: 0.3px;
     }
 
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
     .stats {
       display: flex;
       gap: 12px;
@@ -65,12 +93,34 @@
 
     .stats b { color: var(--text); }
 
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 2px solid var(--chip-border);
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .chip .muted { color: #cbd5e1; font-weight: 800; }
+
     canvas {
       width: 100%;
       max-width: 640px;
       aspect-ratio: 1 / 1;
       background: #0b1220;
-      border: 1px solid #334155;
+      border: 2px solid var(--card-border);
       border-radius: 12px;
       display: block;
       margin: 0 auto;
@@ -93,18 +143,23 @@
     }
 
     button {
-      border: 1px solid #334155;
-      background: #111827;
+      border: 2px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.85);
       color: var(--text);
       border-radius: 10px;
       padding: 8px 12px;
       font-size: 14px;
       cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
     }
 
-    button:hover { border-color: #64748b; }
-    button.primary { background: #14532d; border-color: #166534; }
-    button.danger { background: #3f1d1d; border-color: #7f1d1d; }
+    button:hover { transform: translateY(-1px); }
+    button.primary { background: #dcfce7; border-color: rgba(34, 197, 94, 0.35); }
+    button.danger { background: #fee2e2; border-color: rgba(239, 68, 68, 0.35); }
+    button.primary { color: #064e3b; }
+    button.danger { color: #7f1d1d; }
+
+    button.ghost { background: rgba(15, 23, 42, 0.55); }
 
     .hint {
       color: var(--muted);
@@ -129,8 +184,8 @@
 
     .dpad button {
       border-radius: 12px;
-      border: 1px solid #475569;
-      background: #0f172a;
+      border: 2px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.85);
       font-size: 20px;
       padding: 0;
       width: 58px;
@@ -143,7 +198,106 @@
 
     .dpad button:active {
       transform: scale(0.96);
-      border-color: #22c55e;
+      border-color: rgba(34, 197, 94, 0.75);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(17, 24, 39, 0.28);
+      backdrop-filter: blur(6px);
+      z-index: 30;
+    }
+
+    .modal[open] { display: flex; }
+
+    .modal-card {
+      width: min(92vw, 640px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-card.stats {
+      border-color: rgba(34, 197, 94, 0.22);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(11, 18, 32, 0.98) 100%);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
+
+    .modal-body {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-body ul { margin: 10px 0 0; padding-left: 18px; }
+    .modal-body li { margin: 6px 0; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+      background: rgba(59, 130, 246, 0.10);
+      color: #e5e7eb;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .kpi .card {
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(2, 6, 23, 0.55);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .kpi .value {
+      font-size: 20px;
+      font-weight: 900;
+      margin-top: 2px;
+      color: #e5e7eb;
+      letter-spacing: 0.2px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
     }
 
     @media (max-width: 900px), (pointer: coarse) {
@@ -154,12 +308,18 @@
 <body>
   <main class="app">
     <div class="top">
-      <div class="title">贪吃蛇 Snake</div>
-      <div class="stats">
-        <span>分数：<b id="score">0</b></span>
-        <span>最高分：<b id="best">0</b></span>
-        <span>速度：<b id="speed">8</b> 格/秒</span>
-        <span>状态：<b id="status">待开始</b></span>
+      <div>
+        <div class="title">贪吃蛇 Snake</div>
+        <div class="subtitle">亮色卡通风 · 特殊能力 · 地图事件 · 动态主题</div>
+      </div>
+      <div class="chips" aria-label="状态面板">
+        <span class="chip">分数 <span class="muted" id="score">0</span></span>
+        <span class="chip">最高分 <span class="muted" id="best">0</span></span>
+        <span class="chip">速度 <span class="muted" id="speed">8</span> 格/秒</span>
+        <span class="chip">状态 <span class="muted" id="status">待开始</span></span>
+        <span class="chip">主题 <span class="muted" id="theme">赛博朋克</span></span>
+        <span class="chip">能力 <span class="muted" id="ability">无</span></span>
+        <span class="chip">事件 <span class="muted" id="events">无</span></span>
       </div>
     </div>
 
@@ -169,8 +329,10 @@
       <div class="buttons">
         <button id="startBtn" class="primary">开始 / 暂停 (Space)</button>
         <button id="restartBtn" class="danger">重新开始 (R)</button>
+        <button id="helpBtn" class="ghost">玩法介绍 (?)</button>
+        <button id="themeToggleBtn" class="ghost" aria-label="切换深色/浅色">切换主题</button>
       </div>
-      <div class="hint">方向键 / WASD / 触屏方向键 / 滑动控制，支持穿墙；仅撞到自己结束。</div>
+      <div class="hint">方向键 / WASD / 触屏方向键 / 滑动控制。默认穿墙；仅撞到自己结束（迷宫墙会阻挡）。</div>
     </div>
 
     <div class="mobile-controls" aria-label="触屏方向控制">
@@ -186,12 +348,48 @@
         <span class="empty"></span>
       </div>
     </div>
+
+    <dialog id="helpModal" class="modal">
+      <div class="modal-card" role="document" aria-label="玩法介绍">
+        <div class="modal-title">怎么玩？（新手引导）</div>
+        <div class="modal-body">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+            <span class="pill">吃普通食物 +1</span>
+            <span class="pill">穿墙移动</span>
+            <span class="pill">仅撞到自己结束</span>
+          </div>
+          <ul>
+            <li><b>目标</b>：吃普通食物得分并变长，尽量不要撞到自己。</li>
+            <li><b>特殊食物</b>（彩色发光）：吃到会获得<b>限时能力</b>（穿墙 / 时间减速 / 磁力吸引）。</li>
+            <li><b>地图事件</b>：黑洞会传送、加速带会提速、迷宫会生成墙体（撞墙会结束）。</li>
+            <li><b>操作</b>：键盘方向键/WASD；手机用方向键或在画布上滑动。</li>
+          </ul>
+          <div class="small" style="margin-top:10px;">
+            小技巧：分数越高越快，看到“时间减速”特殊食物可以先抢到手；“磁力吸引”适合追着普通食物连吃。
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="closeHelpBtn" class="primary">开始游戏</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="statsModal" class="modal">
+      <div class="modal-card stats" role="document" aria-label="对局统计">
+        <div class="modal-title">本局统计</div>
+        <div class="modal-body" id="statsBody"></div>
+        <div class="modal-actions">
+          <button id="statsRestartBtn" class="primary">再来一局</button>
+          <button id="statsCloseBtn">关闭</button>
+        </div>
+      </div>
+    </dialog>
   </main>
 
   <script>
     const GRID_SIZE = 20;
-    const BASE_SPEED = 8;
-    const MAX_SPEED = 16;
+    const BASE_SPEED = 6;
+    const MAX_SPEED = 12;
 
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
@@ -199,9 +397,44 @@
     const bestEl = document.getElementById('best');
     const speedEl = document.getElementById('speed');
     const statusEl = document.getElementById('status');
+    const themeEl = document.getElementById('theme');
+    const abilityEl = document.getElementById('ability');
+    const eventsEl = document.getElementById('events');
     const startBtn = document.getElementById('startBtn');
     const restartBtn = document.getElementById('restartBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const helpModal = document.getElementById('helpModal');
+    const closeHelpBtn = document.getElementById('closeHelpBtn');
+    const statsModal = document.getElementById('statsModal');
+    const statsBody = document.getElementById('statsBody');
+    const statsRestartBtn = document.getElementById('statsRestartBtn');
+    const statsCloseBtn = document.getElementById('statsCloseBtn');
     const mobileControls = document.querySelector('.mobile-controls');
+
+    function applyUiTheme(theme) {
+      const root = document.documentElement;
+      if (theme === 'light') {
+        root.setAttribute('data-theme', 'light');
+        themeToggleBtn.textContent = '深色模式';
+      } else {
+        root.removeAttribute('data-theme');
+        themeToggleBtn.textContent = '浅色模式';
+      }
+    }
+
+    function loadUiTheme() {
+      try {
+        const stored = localStorage.getItem('snake_ui_theme');
+        if (stored === 'light' || stored === 'dark') return stored;
+      } catch {}
+      // Default: dark
+      return 'dark';
+    }
+
+    function saveUiTheme(theme) {
+      try { localStorage.setItem('snake_ui_theme', theme); } catch {}
+    }
 
     const cellSize = canvas.width / GRID_SIZE;
 
@@ -229,6 +462,85 @@
     let lastTs = 0;
     let mergeEffects = [];
     let touchStart = null;
+
+    // --- Advanced effects/state ---
+    let particles = [];
+    let backgroundParticles = [];
+    let lastStepHead = null;
+    let effectiveDirection = { x: 1, y: 0 };
+    let turnSmooth = 0; // 0..1
+
+    // --- Run stats ---
+    let runStartedAt = 0;
+    let runEndedAt = 0;
+    let maxLength = 0;
+    let abilitiesCollected = 0;
+    const abilitiesCollectedByType = new Map();
+    const eventsSeen = new Set();
+
+    function formatMs(ms) {
+      const s = Math.max(0, Math.floor(ms / 1000));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${String(r).padStart(2, '0')}`;
+    }
+
+    function closeDialog(dialog) {
+      dialog.removeAttribute('open');
+    }
+
+    function showStats() {
+      const duration = runStartedAt ? (runEndedAt - runStartedAt) : 0;
+      const seen = Array.from(eventsSeen);
+      const parts = [];
+      for (const [k, v] of abilitiesCollectedByType.entries()) {
+        parts.push(`${abilityName(k)}×${v}`);
+      }
+
+      statsBody.innerHTML = `
+        <div class="kpi">
+          <div class="card"><div class="label">用时</div><div class="value">${formatMs(duration)}</div></div>
+          <div class="card"><div class="label">得分</div><div class="value">${score}</div></div>
+          <div class="card"><div class="label">最大长度</div><div class="value">${maxLength}</div></div>
+          <div class="card"><div class="label">最高分</div><div class="value">${best}</div></div>
+        </div>
+        <div style="margin-top:12px; display:grid; gap:8px;">
+          <div>获得能力：<b>${abilitiesCollected}</b>${parts.length ? ` <span class="small">（${parts.join('，')}）</span>` : ''}</div>
+          <div>触发事件：<b>${seen.length ? seen.join('、') : '无'}</b></div>
+        </div>
+      `;
+      statsModal.setAttribute('open', '');
+    }
+
+    const AbilityType = {
+      Wrap: 'wrap',
+      Slow: 'slow',
+      Magnet: 'magnet'
+    };
+
+    const EventType = {
+      BlackHole: 'blackhole',
+      SpeedLane: 'speedlane',
+      Maze: 'maze'
+    };
+
+    let ability = {
+      type: null,
+      until: 0
+    };
+
+    let mapEvents = {
+      blackHoles: [],
+      speedLanes: [],
+      maze: {
+        active: false,
+        until: 0,
+        walls: new Set()
+      },
+      lastSpawnAt: 0
+    };
+
+    let specialFood = null; // {x,y,type,createdAt,ttlMs}
 
     const touchDirMap = {
       up: { x: 0, y: -1 },
@@ -258,8 +570,34 @@
     }
 
     function computeSpeed() {
-      const level = Math.floor(score / 5);
+      // Easier: slower ramp
+      const level = Math.floor(score / 8);
       return Math.min(BASE_SPEED + level, MAX_SPEED);
+    }
+
+    function currentTheme() {
+      // Bright cartoon palettes
+      if (score < 12) return { name: '赛博朋克', bg1: '#050818', bg2: '#0b1220', neon: [34, 197, 94], accent: [236, 72, 153] };
+      if (score < 28) return { name: '森林', bg1: '#06110a', bg2: '#071a11', neon: [34, 197, 94], accent: [34, 211, 238] };
+      return { name: '太空', bg1: '#040311', bg2: '#070b2a', neon: [99, 102, 241], accent: [245, 158, 11] };
+    }
+
+    function abilityName(type) {
+      if (!type) return '无';
+      switch (type) {
+        case AbilityType.Wrap: return '穿墙';
+        case AbilityType.Slow: return '时间减速';
+        case AbilityType.Magnet: return '磁力吸引';
+        default: return '未知';
+      }
+    }
+
+    function activeEventNames() {
+      const names = [];
+      if (mapEvents.blackHoles.length) names.push('黑洞');
+      if (mapEvents.speedLanes.length) names.push('加速带');
+      if (mapEvents.maze.active) names.push('迷宫');
+      return names.length ? names.join('、') : '无';
     }
 
     function syncHUD() {
@@ -271,6 +609,32 @@
       } else {
         statusEl.textContent = running ? '进行中' : '已暂停';
       }
+
+      const theme = currentTheme();
+      themeEl.textContent = theme.name;
+      if (isAbilityActive()) {
+        const left = Math.max(0, Math.ceil((ability.until - performance.now()) / 1000));
+        abilityEl.textContent = `${abilityName(ability.type)} · ${left}s`;
+      } else {
+        abilityEl.textContent = '无';
+      }
+      eventsEl.textContent = activeEventNames();
+    }
+
+    function isAbilityActive() {
+      return ability.type && performance.now() < ability.until;
+    }
+
+    function setAbility(type, durationMs) {
+      ability.type = type;
+      ability.until = performance.now() + durationMs;
+      syncHUD();
+    }
+
+    function clearAbility() {
+      ability.type = null;
+      ability.until = 0;
+      syncHUD();
     }
 
     function resetGame() {
@@ -285,9 +649,32 @@
       score = 0;
       gameOver = false;
       running = false;
+      runStartedAt = 0;
+      runEndedAt = 0;
+      maxLength = snake.length;
+      abilitiesCollected = 0;
+      abilitiesCollectedByType.clear();
+      eventsSeen.clear();
       tickMs = 1000 / computeSpeed();
       accumulator = 0;
       mergeEffects = [];
+      particles = [];
+      backgroundParticles = [];
+      lastStepHead = null;
+      effectiveDirection = { x: 1, y: 0 };
+      turnSmooth = 0;
+      clearAbility();
+      mapEvents = {
+        blackHoles: [],
+        speedLanes: [],
+        maze: {
+          active: false,
+          until: 0,
+          walls: new Set()
+        },
+        lastSpawnAt: 0
+      };
+      specialFood = null;
       food = randomEmptyCell();
       syncHUD();
       draw();
@@ -300,12 +687,139 @@
       };
     }
 
+    function cellKey(x, y) {
+      return `${x},${y}`;
+    }
+
+    function distanceCell(a, b) {
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function randomInt(min, maxInclusive) {
+      return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
+    }
+
+    function spawnSpecialFood() {
+      if (specialFood) return;
+      // Spawn rarely.
+      if (Math.random() > 0.08) return;
+      const types = [AbilityType.Wrap, AbilityType.Slow, AbilityType.Magnet];
+      const type = types[Math.floor(Math.random() * types.length)];
+      specialFood = {
+        ...randomEmptyCell(),
+        type,
+        createdAt: performance.now(),
+        ttlMs: 11000
+      };
+    }
+
+    function maybeExpireSpecialFood(now) {
+      if (!specialFood) return;
+      if (now - specialFood.createdAt > specialFood.ttlMs) specialFood = null;
+    }
+
+    function spawnEventIfNeeded(now) {
+      // Easier: less frequent events
+      if (now - mapEvents.lastSpawnAt < 9000) return;
+      if (Math.random() > 0.14) return;
+
+      mapEvents.lastSpawnAt = now;
+      const roll = Math.random();
+      if (roll < 0.34) {
+        // Black hole
+        const pos = randomEmptyCell();
+        mapEvents.blackHoles = [{ ...pos, createdAt: now, ttlMs: 7000 }];
+        eventsSeen.add('黑洞');
+      } else if (roll < 0.70) {
+        // Speed lanes: 1-2 strips
+        mapEvents.speedLanes = [];
+        const count = Math.random() < 0.6 ? 1 : 2;
+        for (let i = 0; i < count; i++) {
+          const horizontal = Math.random() < 0.5;
+          const line = horizontal ? { axis: 'y', v: randomInt(0, GRID_SIZE - 1) } : { axis: 'x', v: randomInt(0, GRID_SIZE - 1) };
+          mapEvents.speedLanes.push({ ...line, createdAt: now, ttlMs: 7000 });
+        }
+        eventsSeen.add('加速带');
+      } else {
+        // Maze generator: create walls with an opening
+        mapEvents.maze.active = true;
+        mapEvents.maze.until = now + 6500;
+        mapEvents.maze.walls = new Set();
+        // Make a simple randomized maze-ish pattern (no full algorithm; lightweight)
+        const density = 0.07;
+        const opening = { x: randomInt(0, GRID_SIZE - 1), y: randomInt(0, GRID_SIZE - 1) };
+        for (let y = 0; y < GRID_SIZE; y++) {
+          for (let x = 0; x < GRID_SIZE; x++) {
+            if (x === opening.x && y === opening.y) continue;
+            // Avoid spawning walls on snake head start area too aggressively
+            const nearSnake = snake.some(seg => Math.abs(seg.x - x) <= 2 && Math.abs(seg.y - y) <= 2);
+            if (nearSnake) continue;
+            if (Math.random() < density) mapEvents.maze.walls.add(cellKey(x, y));
+          }
+        }
+        eventsSeen.add('迷宫');
+      }
+      syncHUD();
+    }
+
+    function expireEvents(now) {
+      mapEvents.blackHoles = mapEvents.blackHoles.filter(h => now - h.createdAt <= h.ttlMs);
+      mapEvents.speedLanes = mapEvents.speedLanes.filter(l => now - l.createdAt <= l.ttlMs);
+      if (mapEvents.maze.active && now > mapEvents.maze.until) {
+        mapEvents.maze.active = false;
+        mapEvents.maze.walls.clear();
+      }
+    }
+
+    function isSpeedLaneCell(x, y) {
+      for (const lane of mapEvents.speedLanes) {
+        if (lane.axis === 'y' && y === lane.v) return true;
+        if (lane.axis === 'x' && x === lane.v) return true;
+      }
+      return false;
+    }
+
+    function isMazeWall(x, y) {
+      return mapEvents.maze.active && mapEvents.maze.walls.has(cellKey(x, y));
+    }
+
+    function isBlackHoleAt(x, y) {
+      return mapEvents.blackHoles.some(h => h.x === x && h.y === y);
+    }
+
+    function applyMagnet() {
+      if (!isAbilityActive() || ability.type !== AbilityType.Magnet) return;
+      const head = snake[snake.length - 1];
+      const radius = 4;
+      const targets = [food, specialFood].filter(Boolean);
+      for (const t of targets) {
+        const dist = Math.abs(t.x - head.x) + Math.abs(t.y - head.y);
+        if (dist <= radius && dist > 0) {
+          // Pull one step toward head (grid-wise)
+          const dx = head.x - t.x;
+          const dy = head.y - t.y;
+          const step = Math.abs(dx) > Math.abs(dy)
+            ? { x: Math.sign(dx), y: 0 }
+            : { x: 0, y: Math.sign(dy) };
+          const candidate = wrapPosition({ x: t.x + step.x, y: t.y + step.y });
+          const blocked = snake.some(seg => seg.x === candidate.x && seg.y === candidate.y) || isMazeWall(candidate.x, candidate.y) || isBlackHoleAt(candidate.x, candidate.y);
+          if (!blocked) {
+            t.x = candidate.x;
+            t.y = candidate.y;
+          }
+        }
+      }
+    }
+
     function setDirection(next) {
       if (!next || gameOver) return;
       if (next.x === -direction.x && next.y === -direction.y) return;
       nextDirection = next;
       if (!running) {
         running = true;
+        if (!runStartedAt) runStartedAt = performance.now();
         syncHUD();
       }
     }
@@ -313,8 +827,31 @@
     function step() {
       direction = nextDirection;
       const head = snake[snake.length - 1];
-      const newHead = wrapPosition({ x: head.x + direction.x, y: head.y + direction.y });
+      // Apply inertial smoothing for rendering (not gameplay):
+      if (direction.x !== effectiveDirection.x || direction.y !== effectiveDirection.y) {
+        turnSmooth = 0;
+      }
+      effectiveDirection = direction;
+
+      let newHeadRaw = { x: head.x + direction.x, y: head.y + direction.y };
+      const wrapEnabled = isAbilityActive() ? (ability.type === AbilityType.Wrap || ability.type === AbilityType.Slow || ability.type === AbilityType.Magnet) : true;
+      const newHead = wrapEnabled ? wrapPosition(newHeadRaw) : newHeadRaw;
+
+      // Maze walls / black holes are obstacles (black hole teleports randomly).
+      if (isMazeWall(newHead.x, newHead.y)) {
+        endGame();
+        return;
+      }
+
+      if (isBlackHoleAt(newHead.x, newHead.y)) {
+        // Teleport head to a safe random cell; keep length
+        const tp = randomEmptyCell();
+        newHead.x = tp.x;
+        newHead.y = tp.y;
+      }
+
       const ateFood = newHead.x === food.x && newHead.y === food.y;
+      const ateSpecial = specialFood && newHead.x === specialFood.x && newHead.y === specialFood.y;
       const hitsBody = snake.some((seg, idx) => {
         if (!ateFood && idx === 0) return false;
         return seg.x === newHead.x && seg.y === newHead.y;
@@ -334,6 +871,18 @@
         intensity: ateFood ? 1.2 : 0.8
       });
 
+      // Trail particles (neon)
+      const theme = currentTheme();
+      particles.push({
+        x: (newHead.x + 0.5) * cellSize,
+        y: (newHead.y + 0.5) * cellSize,
+        vx: (Math.random() - 0.5) * 12,
+        vy: (Math.random() - 0.5) * 12,
+        life: 650,
+        born: performance.now(),
+        color: `rgba(${theme.neon[0]}, ${theme.neon[1]}, ${theme.neon[2]}, 0.55)`
+      });
+
       if (ateFood) {
         score += 1;
         if (score > best) {
@@ -346,17 +895,39 @@
         snake.shift();
       }
 
+      if (ateSpecial) {
+        const type = specialFood.type;
+        specialFood = null;
+        abilitiesCollected += 1;
+        abilitiesCollectedByType.set(type, (abilitiesCollectedByType.get(type) || 0) + 1);
+        // abilities last 7-10 seconds.
+        if (type === AbilityType.Wrap) setAbility(AbilityType.Wrap, 11000);
+        if (type === AbilityType.Slow) setAbility(AbilityType.Slow, 10500);
+        if (type === AbilityType.Magnet) setAbility(AbilityType.Magnet, 11000);
+      }
+
+      // Speed lane changes tickMs temporarily
+      if (isSpeedLaneCell(newHead.x, newHead.y)) {
+        tickMs = 1000 / Math.min(computeSpeed() + 3, 16);
+      } else {
+        tickMs = 1000 / computeSpeed();
+      }
+
       if (mergeEffects.length > 30) {
         mergeEffects = mergeEffects.slice(-30);
       }
 
+      lastStepHead = { x: newHead.x, y: newHead.y };
+      maxLength = Math.max(maxLength, snake.length);
       syncHUD();
     }
 
     function endGame() {
       gameOver = true;
       running = false;
+      runEndedAt = performance.now();
       syncHUD();
+      showStats();
     }
 
     function drawGrid() {
@@ -372,6 +943,41 @@
         ctx.moveTo(0, p);
         ctx.lineTo(canvas.width, p);
         ctx.stroke();
+      }
+    }
+
+    function drawDynamicBackground(now) {
+      const theme = currentTheme();
+      // Gradient
+      const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      g.addColorStop(0, theme.bg1);
+      g.addColorStop(1, theme.bg2);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Background particles (stars/fireflies)
+      if (backgroundParticles.length < 55) {
+        for (let i = backgroundParticles.length; i < 55; i++) {
+          backgroundParticles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: 0.6 + Math.random() * 1.8,
+            phase: Math.random() * Math.PI * 2,
+            drift: (Math.random() - 0.5) * 0.12
+          });
+        }
+      }
+      const accent = theme.accent;
+      for (const p of backgroundParticles) {
+        p.phase += 0.02;
+        p.x += p.drift;
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+        const a = 0.18 + 0.12 * (0.5 + 0.5 * Math.sin(p.phase));
+        ctx.fillStyle = `rgba(${accent[0]}, ${accent[1]}, ${accent[2]}, ${a.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
@@ -394,6 +1000,24 @@
       ctx.fill();
     }
 
+    function drawGlowyCell(x, y, baseColor, pulse, radius = 10) {
+      const cx = x * cellSize + cellSize / 2;
+      const cy = y * cellSize + cellSize / 2;
+      const glow = (cellSize * 0.55) * (1.05 + 0.25 * pulse);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, glow);
+      grad.addColorStop(0, baseColor);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glow, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      drawCell(x, y, baseColor, radius);
+    }
+
     function drawMergeEffects(now) {
       mergeEffects = mergeEffects.filter(effect => now - effect.time <= effect.duration);
       for (const effect of mergeEffects) {
@@ -410,20 +1034,122 @@
       }
     }
 
+    function drawParticles(now) {
+      particles = particles.filter(p => now - p.born <= p.life);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (const p of particles) {
+        const t = (now - p.born) / p.life;
+        const a = 0.55 * (1 - t);
+        p.x += p.vx * 0.016;
+        p.y += p.vy * 0.016;
+        ctx.fillStyle = p.color.replace(/0\.55\)$/, `${a.toFixed(3)})`);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.0 + 2.2 * (1 - t), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawEvents(now) {
+      // Black holes
+      if (mapEvents.blackHoles.length) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for (const h of mapEvents.blackHoles) {
+          const cx = (h.x + 0.5) * cellSize;
+          const cy = (h.y + 0.5) * cellSize;
+          const phase = 0.5 + 0.5 * Math.sin(now / 160);
+          const r1 = cellSize * (0.25 + 0.05 * phase);
+          const r2 = cellSize * (0.95 + 0.2 * phase);
+          const g = ctx.createRadialGradient(cx, cy, r1, cx, cy, r2);
+          g.addColorStop(0, 'rgba(0,0,0,0.85)');
+          g.addColorStop(0.35, 'rgba(99,102,241,0.25)');
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Speed lanes
+      if (mapEvents.speedLanes.length) {
+        const theme = currentTheme();
+        const c = theme.accent;
+        const a = 0.10;
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for (const lane of mapEvents.speedLanes) {
+          ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+          if (lane.axis === 'y') {
+            ctx.fillRect(0, lane.v * cellSize, canvas.width, cellSize);
+          } else {
+            ctx.fillRect(lane.v * cellSize, 0, cellSize, canvas.height);
+          }
+        }
+        ctx.restore();
+      }
+
+      // Maze walls
+      if (mapEvents.maze.active) {
+        const theme = currentTheme();
+        const c = theme.neon;
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.16)`;
+        for (const key of mapEvents.maze.walls) {
+          const [xs, ys] = key.split(',');
+          const x = Number(xs);
+          const y = Number(ys);
+          ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+        }
+        ctx.restore();
+      }
+    }
+
     function draw() {
       const now = performance.now();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#0b1220';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      drawDynamicBackground(now);
       drawGrid();
 
-      drawCell(food.x, food.y, '#f59e0b', 10);
+      drawEvents(now);
+
+      // Food glow/pulse
+      const foodPulse = 0.5 + 0.5 * Math.sin(now / 140);
+      drawGlowyCell(food.x, food.y, '#f59e0b', foodPulse, 10);
+
+      // Special food
+      if (specialFood) {
+        const pulse = 0.5 + 0.5 * Math.sin(now / 120);
+        const color = specialFood.type === AbilityType.Wrap
+          ? 'rgba(34,197,94,1)'
+          : specialFood.type === AbilityType.Slow
+            ? 'rgba(34,211,238,1)'
+            : 'rgba(236,72,153,1)';
+        drawGlowyCell(specialFood.x, specialFood.y, color, pulse, 12);
+      }
+
       drawMergeEffects(now);
+      drawParticles(now);
 
       for (let i = 0; i < snake.length; i++) {
         const seg = snake[i];
         const isHead = i === snake.length - 1;
-        drawCell(seg.x, seg.y, isHead ? '#16a34a' : '#22c55e', isHead ? 10 : 8);
+        // Fluid-ish bend: render head slightly offset towards direction
+        if (isHead) {
+          const offset = cellSize * 0.12 * Math.min(1, turnSmooth);
+          const px = seg.x * cellSize + 2 + effectiveDirection.x * offset;
+          const py = seg.y * cellSize + 2 + effectiveDirection.y * offset;
+          const size = cellSize - 4;
+          ctx.fillStyle = '#16a34a';
+          roundRect(px, py, size, size, Math.min(10, size / 3));
+          ctx.fill();
+        } else {
+          drawCell(seg.x, seg.y, '#22c55e', 8);
+        }
       }
 
       if (!running && !gameOver) {
@@ -454,12 +1180,27 @@
       lastTs = ts;
 
       if (running && !gameOver) {
+        const now = ts;
+        // Ability slow: increases tickMs (slower) while active.
+        const slowMultiplier = isAbilityActive() && ability.type === AbilityType.Slow ? 1.75 : 1.0;
+        const effectiveTick = tickMs * slowMultiplier;
+
         accumulator += dt;
-        while (accumulator >= tickMs) {
+        while (accumulator >= effectiveTick) {
+          // Per-tick updates
+          expireEvents(now);
+          maybeExpireSpecialFood(now);
+          if (!isAbilityActive()) clearAbility();
+          spawnEventIfNeeded(now);
+          spawnSpecialFood();
+          applyMagnet();
           step();
-          accumulator -= tickMs;
+          accumulator -= effectiveTick;
           if (gameOver) break;
         }
+
+        // Smooth turn progression for render
+        turnSmooth = Math.min(1, turnSmooth + dt / 140);
       }
 
       draw();
@@ -478,6 +1219,11 @@
 
       if (e.key.toLowerCase() === 'r') {
         resetGame();
+        return;
+      }
+
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        helpModal.setAttribute('open', '');
         return;
       }
 
@@ -531,13 +1277,57 @@
     startBtn.addEventListener('click', () => {
       if (gameOver) return;
       running = !running;
+      if (running && !runStartedAt) runStartedAt = performance.now();
       syncHUD();
     });
 
     restartBtn.addEventListener('click', resetGame);
 
+    helpBtn.addEventListener('click', () => {
+      helpModal.setAttribute('open', '');
+    });
+
+    closeHelpBtn.addEventListener('click', () => {
+      closeDialog(helpModal);
+      if (!gameOver && !running) {
+        running = true;
+        if (!runStartedAt) runStartedAt = performance.now();
+        syncHUD();
+      }
+    });
+
+    statsRestartBtn.addEventListener('click', () => {
+      closeDialog(statsModal);
+      resetGame();
+      running = true;
+      runStartedAt = performance.now();
+      syncHUD();
+    });
+
+    statsCloseBtn.addEventListener('click', () => {
+      closeDialog(statsModal);
+    });
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      const next = current === 'light' ? 'dark' : 'light';
+      applyUiTheme(next);
+      saveUiTheme(next);
+    });
+
     best = loadBestScore();
     resetGame();
+    applyUiTheme(loadUiTheme());
+    // Show tutorial on first load
+    try {
+      const seen = localStorage.getItem('snake_seen_help') === '1';
+      if (!seen) {
+        helpModal.setAttribute('open', '');
+        localStorage.setItem('snake_seen_help', '1');
+      }
+    } catch {
+      helpModal.setAttribute('open', '');
+    }
     requestAnimationFrame(loop);
   </script>
 </body>
