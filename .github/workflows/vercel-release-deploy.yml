@@ -1,8 +1,13 @@
 name: Deploy to Vercel on Release
 
 on:
+  workflow_dispatch:
   release:
-    types: [published]
+    types: [published, released]
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -10,16 +15,20 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && startsWith(github.event.release.tag_name, 'v')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.release.tag_name }}
 
-      - name: Deploy to Vercel (production)
+      - name: Build and Deploy to Vercel (production)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest build --prod --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN" \
+            --meta releaseTag="${{ github.event.release.tag_name || github.ref_name }}" \
+            --meta trigger="${{ github.event_name }}"
