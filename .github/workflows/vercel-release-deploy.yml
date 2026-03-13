@@ -31,6 +31,14 @@ jobs:
           npx --yes vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
           RELEASE_TAG="${{ github.event.release.tag_name || github.ref_name }}"
           sed -i "s/__RELEASE_TAG__/${RELEASE_TAG}/g" index.html
+          if grep -q "__RELEASE_TAG__" index.html; then
+            echo "ERROR: release tag placeholder was not fully replaced"
+            exit 1
+          fi
+          if ! grep -q "const RELEASE_VERSION = '${RELEASE_TAG}';" index.html; then
+            echo "ERROR: release version injection verification failed"
+            exit 1
+          fi
           npx --yes vercel@latest build --prod --token "$VERCEL_TOKEN"
           npx --yes vercel@latest deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN" \
             --meta releaseTag="${{ github.event.release.tag_name || github.ref_name }}" \

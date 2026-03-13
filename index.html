@@ -491,12 +491,13 @@
     const statsCloseBtn = document.getElementById('statsCloseBtn');
     const mobileControls = document.querySelector('.mobile-controls');
     const releaseVersionEl = document.getElementById('releaseVersion');
-    const resolvedReleaseVersion = RELEASE_VERSION === '__RELEASE_TAG__' ? 'local-dev' : RELEASE_VERSION;
-    const releaseUrl = resolvedReleaseVersion === 'local-dev'
-      ? RELEASES_BASE_URL
-      : `${RELEASES_BASE_URL}/tag/${encodeURIComponent(resolvedReleaseVersion)}`;
+    const isInjectedRelease = RELEASE_VERSION !== '__RELEASE_TAG__';
+    const resolvedReleaseVersion = isInjectedRelease ? RELEASE_VERSION : 'dev';
+    const releaseUrl = isInjectedRelease
+      ? `${RELEASES_BASE_URL}/tag/${encodeURIComponent(resolvedReleaseVersion)}`
+      : RELEASES_BASE_URL;
     releaseVersionEl.href = releaseUrl;
-    releaseVersionEl.title = resolvedReleaseVersion === 'local-dev'
+    releaseVersionEl.title = !isInjectedRelease
       ? '查看 GitHub Releases'
       : `查看 ${resolvedReleaseVersion} 发布说明`;
     releaseVersionEl.textContent = `版本 ${resolvedReleaseVersion}`;
