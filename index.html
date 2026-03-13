@@ -491,8 +491,8 @@
     const statsCloseBtn = document.getElementById('statsCloseBtn');
     const mobileControls = document.querySelector('.mobile-controls');
     const releaseVersionEl = document.getElementById('releaseVersion');
-    const isInjectedRelease = RELEASE_VERSION !== '__RELEASE_TAG__';
-    const resolvedReleaseVersion = isInjectedRelease ? RELEASE_VERSION : 'dev';
+    const resolvedReleaseVersion = RELEASE_VERSION;
+    const isInjectedRelease = resolvedReleaseVersion !== 'dev';
     const releaseUrl = isInjectedRelease
       ? `${RELEASES_BASE_URL}/tag/${encodeURIComponent(resolvedReleaseVersion)}`
       : RELEASES_BASE_URL;
