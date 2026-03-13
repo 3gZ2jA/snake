@@ -27,6 +27,13 @@ python3 -m http.server 8000 --bind 0.0.0.0
 - R：重新开始
 - 主题切换：页面按钮「切换主题」（深色/浅色，会记住你的选择）
 
+## Version Display / 版本展示
+
+- 页面右上角会显示当前部署版本：
+  - Release 部署：显示对应的 tag（如 `v0.1.3`）
+  - 本地未注入版本时：显示 `local-dev`
+  便于截图反馈与线上问题定位。
+
 ## Rules / 规则
 
 - 支持穿墙：撞到边框不会结束，会从对向边框出来
@@ -72,4 +79,3 @@ python3 -m http.server 8000 --bind 0.0.0.0
 - 只有在 GitHub 创建并发布 **Release** 后，才会自动部署该 Release 对应的 tag 版本到 Vercel
 <!-- validation: push should not trigger Vercel production deploy -->
 <!-- validation: github-actions-push-smoke -->
-

@@ -53,6 +53,29 @@
       padding: 24px;
     }
 
+    .release-version {
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 10;
+      pointer-events: none;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: rgba(15, 23, 42, 0.72);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      backdrop-filter: blur(4px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    :root[data-theme="light"] .release-version {
+      background: rgba(255, 255, 255, 0.82);
+      color: #374151;
+    }
+
     .app {
       width: min(92vw, 680px);
       background: var(--panel);
@@ -343,10 +366,10 @@
 
     <div class="controls">
       <div class="buttons">
-        <button id="startBtn" class="primary">开始 / 暂停 (Space)</button>
-        <button id="restartBtn" class="danger">重新开始 (R)</button>
-        <button id="helpBtn" class="ghost">玩法介绍 (?)</button>
-        <button id="themeToggleBtn" class="ghost" aria-label="切换深色/浅色">切换主题</button>
+        <button type="button" id="startBtn" class="primary">开始 / 暂停 (Space)</button>
+        <button type="button" id="restartBtn" class="danger">重新开始 (R)</button>
+        <button type="button" id="helpBtn" class="ghost">玩法介绍 (?)</button>
+        <button type="button" id="themeToggleBtn" class="ghost" aria-label="切换深色/浅色">切换主题</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
         <label class="hint" for="difficultySelect" style="display:inline-flex; gap:8px; align-items:center;">
@@ -395,7 +418,7 @@
           </div>
         </div>
         <div class="modal-actions">
-          <button id="closeHelpBtn" class="primary">开始游戏</button>
+          <button type="button" id="closeHelpBtn" class="primary">开始游戏</button>
         </div>
       </div>
     </dialog>
@@ -405,14 +428,17 @@
         <div class="modal-title">本局统计</div>
         <div class="modal-body" id="statsBody"></div>
         <div class="modal-actions">
-          <button id="statsRestartBtn" class="primary">再来一局</button>
-          <button id="statsCloseBtn">关闭</button>
+          <button type="button" id="statsRestartBtn" class="primary">再来一局</button>
+          <button type="button" id="statsCloseBtn">关闭</button>
         </div>
       </div>
     </dialog>
   </main>
 
+  <div class="release-version" id="releaseVersion" aria-label="发布版本"></div>
+
   <script>
+    const RELEASE_VERSION = '__RELEASE_TAG__';
     const GRID_SIZE = 20;
     const BASE_SPEED = 6;
     const MAX_SPEED = 12;
@@ -438,6 +464,9 @@
     const statsRestartBtn = document.getElementById('statsRestartBtn');
     const statsCloseBtn = document.getElementById('statsCloseBtn');
     const mobileControls = document.querySelector('.mobile-controls');
+    const releaseVersionEl = document.getElementById('releaseVersion');
+    const resolvedReleaseVersion = RELEASE_VERSION === '__RELEASE_TAG__' ? 'local-dev' : RELEASE_VERSION;
+    releaseVersionEl.textContent = `版本 ${resolvedReleaseVersion}`;
 
     function applyUiTheme(theme) {
       const root = document.documentElement;
