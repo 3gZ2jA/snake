@@ -55,25 +55,50 @@
 
     .release-version {
       position: fixed;
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
+      right: max(10px, env(safe-area-inset-right));
+      bottom: max(10px, env(safe-area-inset-bottom));
       z-index: 10;
-      pointer-events: none;
-      border: 1px solid var(--card-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
       border-radius: 999px;
-      padding: 4px 10px;
-      background: rgba(15, 23, 42, 0.72);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
+      background: rgba(15, 23, 42, 0.42);
+      color: rgba(226, 232, 240, 0.72);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18px;
+      text-decoration: none;
       backdrop-filter: blur(4px);
-      box-shadow: var(--shadow-soft);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+      transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+
+    .release-version:hover {
+      background: rgba(15, 23, 42, 0.58);
+      color: rgba(248, 250, 252, 0.92);
+      border-color: rgba(148, 163, 184, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .release-version:focus-visible {
+      outline: 2px solid rgba(59, 130, 246, 0.42);
+      outline-offset: 2px;
     }
 
     :root[data-theme="light"] .release-version {
-      background: rgba(255, 255, 255, 0.82);
-      color: #374151;
+      background: rgba(255, 255, 255, 0.68);
+      color: rgba(55, 65, 81, 0.74);
+      border-color: rgba(31, 41, 55, 0.10);
+      box-shadow: 0 6px 18px rgba(17, 24, 39, 0.08);
+    }
+
+    :root[data-theme="light"] .release-version:hover {
+      background: rgba(255, 255, 255, 0.88);
+      color: rgba(17, 24, 39, 0.94);
+      border-color: rgba(31, 41, 55, 0.16);
     }
 
     .app {
@@ -435,10 +460,11 @@
     </dialog>
   </main>
 
-  <div class="release-version" id="releaseVersion" aria-label="发布版本"></div>
+  <a class="release-version" id="releaseVersion" aria-label="查看发布版本" target="_blank" rel="noreferrer"></a>
 
   <script>
     const RELEASE_VERSION = '__RELEASE_TAG__';
+    const RELEASES_BASE_URL = 'https://github.com/3gZ2jA/snake/releases';
     const GRID_SIZE = 20;
     const BASE_SPEED = 6;
     const MAX_SPEED = 12;
@@ -466,6 +492,13 @@
     const mobileControls = document.querySelector('.mobile-controls');
     const releaseVersionEl = document.getElementById('releaseVersion');
     const resolvedReleaseVersion = RELEASE_VERSION === '__RELEASE_TAG__' ? 'local-dev' : RELEASE_VERSION;
+    const releaseUrl = resolvedReleaseVersion === 'local-dev'
+      ? RELEASES_BASE_URL
+      : `${RELEASES_BASE_URL}/tag/${encodeURIComponent(resolvedReleaseVersion)}`;
+    releaseVersionEl.href = releaseUrl;
+    releaseVersionEl.title = resolvedReleaseVersion === 'local-dev'
+      ? '查看 GitHub Releases'
+      : `查看 ${resolvedReleaseVersion} 发布说明`;
     releaseVersionEl.textContent = `版本 ${resolvedReleaseVersion}`;
 
     function applyUiTheme(theme) {

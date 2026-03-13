@@ -77,5 +77,6 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 - **GitHub push 不会自动部署到 Vercel**
 - 只有在 GitHub 创建并发布 **Release** 后，才会自动部署该 Release 对应的 tag 版本到 Vercel
+- 页面右下角会显示当前发布版本号，点击可跳转到对应的 GitHub Release 页面
 <!-- validation: push should not trigger Vercel production deploy -->
 <!-- validation: github-actions-push-smoke -->
