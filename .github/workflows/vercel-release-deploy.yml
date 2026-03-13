@@ -28,6 +28,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          npx --yes vercel@latest pull --yes --environment=production --token "$VERCEL_TOKEN"
           RELEASE_TAG="${{ github.event.release.tag_name || github.ref_name }}"
           sed -i "s/__RELEASE_TAG__/${RELEASE_TAG}/g" index.html
           npx --yes vercel@latest build --prod --token "$VERCEL_TOKEN"
